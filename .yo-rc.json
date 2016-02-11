@@ -1,0 +1,26 @@
+{
+  "generator-jhipster": {
+    "baseName": "jepret",
+    "packageName": "net.projecthade.jepret",
+    "packageFolder": "net/projecthade/jepret",
+    "authenticationType": "session",
+    "hibernateCache": "no",
+    "clusteredHttpSession": "no",
+    "websocket": "spring-websocket",
+    "databaseType": "mongodb",
+    "devDatabaseType": "mongodb",
+    "prodDatabaseType": "mongodb",
+    "searchEngine": "no",
+    "useSass": true,
+    "buildTool": "maven",
+    "frontendBuilder": "grunt",
+    "enableTranslation": true,
+    "enableSocialSignIn": true,
+    "rememberMeKey": "fa392ef430b7ed4c8b58f782028b9faa516c0295",
+    "testFrameworks": [
+      "gatling",
+      "cucumber",
+      "protractor"
+    ]
+  }
+}

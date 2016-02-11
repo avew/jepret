@@ -1,0 +1,7 @@
+jepret-mongodb:
+  container_name: jepret-mongodb
+  image: mongo:3.0.7
+  # volumes:
+  #   - ~/volumes/jhipster/jepret/mongodb/:/data/db/
+  ports:
+    - "27017:27017"

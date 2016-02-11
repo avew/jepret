@@ -1,0 +1,6 @@
+jepret-sonar:
+  container_name: jepret-sonar
+  image: sonarqube:4.5.6
+  ports:
+    - "9000:9000"
+    - "9092:9092"
