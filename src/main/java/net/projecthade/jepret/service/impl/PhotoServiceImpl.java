@@ -3,7 +3,6 @@ package net.projecthade.jepret.service.impl;
 import net.projecthade.jepret.domain.Photo;
 import net.projecthade.jepret.repository.PhotoRepository;
 import net.projecthade.jepret.service.PhotoService;
-import net.projecthade.jepret.web.rest.dto.ManagedPhotoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -40,11 +39,16 @@ public class PhotoServiceImpl implements PhotoService {
         return result;
     }
 
+
     @Override
-    public ManagedPhotoDTO create(String name,int rating, double latitude, double longitude ) {
-        Photo photo = new Photo(name, rating, latitude, longitude);
-        Photo save = photoRepository.save(photo);
-        return new ManagedPhotoDTO(save);
+    public Optional<Photo> update(Photo photo) {
+        return photoRepository.findOneById(photo.getId())
+            .map(p -> {
+                p.setName(photo.getName());
+                p.setRating(photo.getRating());
+                p.setLocation(photo.getLocation());
+                return photoRepository.save(photo);
+            });
     }
 
 

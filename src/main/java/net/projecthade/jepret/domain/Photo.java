@@ -15,7 +15,7 @@ import java.util.Arrays;
  */
 
 @Document(collection = "photo")
-public class Photo extends AbstractAuditingEntity implements Serializable {
+public class Photo implements Serializable {
 
     @Id
     private String id;

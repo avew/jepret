@@ -3,6 +3,7 @@ package net.projecthade.jepret.web.rest;
 import com.codahale.metrics.annotation.Timed;
 import net.projecthade.jepret.domain.Photo;
 import net.projecthade.jepret.service.PhotoService;
+import net.projecthade.jepret.web.rest.dto.MessageErrorDTO;
 import net.projecthade.jepret.web.rest.util.HeaderUtil;
 import net.projecthade.jepret.web.rest.util.PaginationUtil;
 import org.slf4j.Logger;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
@@ -43,15 +43,14 @@ public class PhotoResource {
         method = RequestMethod.POST,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<Photo> createPhoto(@Valid @RequestBody Photo photo) throws URISyntaxException {
+    public ResponseEntity<?> createPhoto(@Valid @RequestBody Photo photo) throws URISyntaxException {
         log.debug("REST request to save Photo : {}", photo);
-        if (photo.getId() != null) {
-            return ResponseEntity.badRequest().headers(HeaderUtil.createFailureAlert("photo", "idexists", "A new photo cannot already have an ID")).body(null);
+        if (photoService.findByName(photo.getName()).isPresent()) {
+            return new ResponseEntity<Object>(new MessageErrorDTO("Photo name already exists"), HttpStatus.BAD_REQUEST);
+        } else {
+            Photo result = photoService.save(photo);
+            return new ResponseEntity<Object>(result, HttpStatus.OK);
         }
-        Photo result = photoService.save(photo);
-        return ResponseEntity.created(new URI("/api/photos/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert("photo", result.getId().toString()))
-            .body(result);
     }
 
     /**
@@ -61,15 +60,12 @@ public class PhotoResource {
         method = RequestMethod.PUT,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<Photo> updatePhoto(@Valid @RequestBody Photo photo) throws URISyntaxException {
+    public ResponseEntity<?> updatePhoto(@Valid @RequestBody Photo photo) throws URISyntaxException {
         log.debug("REST request to update Photo : {}", photo);
-        if (photo.getId() == null) {
-            return createPhoto(photo);
-        }
-        Photo result = photoService.save(photo);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert("photo", photo.getId().toString()))
-            .body(result);
+        return photoService.update(photo)
+            .map(x -> new ResponseEntity<>(x, HttpStatus.OK))
+            .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+
     }
 
     /**
@@ -120,6 +116,12 @@ public class PhotoResource {
 
     /**
      * GET  /photos/nearby -> get all the photos nearby
+     *
+     * @param latitude
+     * @param longitude
+     * @param distance
+     * @return
+     * @throws URISyntaxException
      */
     @RequestMapping(value = "/photos/nearby",
         method = RequestMethod.GET,
@@ -129,6 +131,10 @@ public class PhotoResource {
         @RequestParam(name = "latitude", defaultValue = "0.0", required = true) double latitude,
         @RequestParam(name = "longitude", defaultValue = "0.0", required = true) double longitude,
         @RequestParam(name = "distance", defaultValue = "1", required = true) Integer distance
+//        @RequestParam(name = "page", defaultValue = "1") Integer page,
+//        @RequestParam(name = "size", defaultValue = "50") Integer size,
+//        @RequestParam(name = "sort", defaultValue = "ASC") String sort,
+//        @RequestParam(name = "sort_by", defaultValue = "name") String sort_by
     )
         throws URISyntaxException {
         log.debug("REST request to get a page of Photos nearby");
@@ -137,8 +143,15 @@ public class PhotoResource {
             .parallelStream()
             .map(GeoResult::getContent)
             .collect(Collectors.toList());
-        return new ResponseEntity<>(collect, HttpStatus.OK);
+        return new ResponseEntity<Object>(collect, HttpStatus.OK);
+//        GeoResults<Photo> byLocationNear = photoService.findByLocationNear(latitude, longitude, distance);
+//
+//        Pageable pageable = new PageRequest(page, size, Sort.Direction.fromString(sort), sort_by);
+//        GeoPage geoPage = new GeoPage(byLocationNear, pageable, byLocationNear.getContent().size());
+////        Page<Photo> usersPage = new PageImpl<>(collect, pageable, collect.size());
+//        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(geoPage, "/api/photos/nearby");
+//        return new ResponseEntity<>(geoPage.getContent(), headers, HttpStatus.OK);
     }
 
-    
+
 }

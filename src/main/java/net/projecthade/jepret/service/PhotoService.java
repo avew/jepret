@@ -1,7 +1,6 @@
 package net.projecthade.jepret.service;
 
 import net.projecthade.jepret.domain.Photo;
-import net.projecthade.jepret.web.rest.dto.ManagedPhotoDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.geo.GeoResults;
@@ -21,7 +20,9 @@ public interface PhotoService {
      */
     public Photo save(Photo photo);
 
-    public ManagedPhotoDTO create(String name,int rating, double latitude, double longitude);
+
+    public Optional<Photo> update(Photo photo);
+
 
     /**
      * get all the photos.
